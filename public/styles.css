@@ -1,0 +1,55 @@
+*, *::after, *::before { box-sizing: border-box; }
+:root { --background-color: #1e1e1e; --dot-color: #e2b714; }
+body { margin: 0; background-color: var(--background-color); overflow: hidden; }
+.dot {
+  --x: 50; --y: 50; --radius: 2;
+  position: absolute; background-color: var(--dot-color);
+  left: calc(var(--x) * 1vw); top: calc(var(--y) * 1vh);
+  border-radius: 50%; width: calc(var(--radius) * 1vw);
+  height: calc(var(--radius) * 1vw); transform: translate(-50%, -50%);
+}
+.controls-panel {
+  position: absolute; left: 5vw; bottom: 8vh; width: 315px;
+  display: flex; flex-direction: column; gap: 10px; padding: 10px;
+  font-family: Arial, Helvetica, sans-serif;
+  opacity: 0.06; transition: opacity 0.25s ease; z-index: 20;
+}
+.controls-panel:hover, .controls-panel:focus-within { opacity: 1; }
+.control-row {
+  display: grid; grid-template-columns: 90px 28px 135px 28px;
+  align-items: center; column-gap: 6px; min-height: 30px;
+}
+#velocitytext, #sizetext, #rangetext {
+  font-weight: bold; font-size: 14px; color: white; white-space: nowrap;
+  user-select: none;
+}
+#velocityslider, #sizeslider, #rangeslider { width: 135px; margin: 0; }
+.slider-step-button {
+  width: 28px; height: 28px; padding: 0; display: flex;
+  align-items: center; justify-content: center;
+  border: 1px solid rgba(255,255,255,.7); border-radius: 5px;
+  background-color: rgba(255,255,255,.08); color: white;
+  font: bold 18px Arial, Helvetica, sans-serif; line-height: 1;
+  cursor: pointer; user-select: none;
+}
+.slider-step-button:hover { background-color: rgba(255,255,255,.18); }
+.slider-step-button:active { transform: scale(.92); }
+.color-control-row {
+  display: grid; grid-template-columns: 180px 45px; align-items: center;
+  min-height: 30px; font: bold 14px Arial, Helvetica, sans-serif; color: white;
+}
+#targetcolor, #backgroundcolor {
+  width: 42px; height: 28px; padding: 0; border: 1px solid white;
+  border-radius: 4px; background: transparent; cursor: pointer;
+}
+.routine-controls { margin-top: 6px; display: flex; flex-direction: column; gap: 7px; }
+.routine-change-row { display: flex; align-items: center; gap: 10px; }
+.changeroutine, .routinename {
+  font-family: Arial, Helvetica, sans-serif; font-weight: bold; color: white; user-select: none;
+}
+.changeroutine { font-size: 14px; margin-right: 5px; }
+.routinename { font-size: 15px; }
+.arrow { width: 0; height: 0; border-style: solid; cursor: pointer; position: relative; }
+.left { border-width: 10px 20px 10px 0; border-color: transparent #fff transparent transparent; }
+.right { border-width: 10px 0 10px 20px; border-color: transparent transparent transparent #fff; }
+.arrow:hover { transform: scale(1.2); }

@@ -1,0 +1,50 @@
+import { DirectionChangingRotationsRoutine } from './Routines/DirectionChangingRotationsRoutine.js';
+import { PeekabooRoutine } from './Routines/PeekabooRoutine.js';
+import { InverseWaveRoutine } from './Routines/InverseWaveRoutine.js';
+import { CounterClockwiseRotationRoutine } from "./Routines/CounterClockwiseRotationRoutine.js";
+import { ClockwiseRotationRoutine } from "./Routines/ClockwiseRotationRoutine.js";
+import { ElasticCollisionRoutine } from "./Routines/ElasticCollisionRoutine.js";
+import { LeftRightRoutine } from "./Routines/LeftRightRoutine.js";
+import { UpDownRoutine } from "./Routines/UpDownRoutine.js";
+import { DiagonalUpwardRoutine } from "./Routines/DiagonalUpwardRoutine.js";
+import { DiagonalDownwardRoutine } from './Routines/DiagonalDownwardRoutine.js';
+import { WaveRoutine } from "./Routines/WaveRoutine.js";
+import { HorizontalSaccadeRoutine } from "./Routines/HorizontalSaccadeRoutine.js";
+import { VerticalSaccadeRoutine } from "./Routines/VerticalSaccadeRoutine.js";
+import { DiagonalDownSaccadeRoutine } from "./Routines/DiagonalDownSaccadeRoutine.js";
+import { DiagonalUpSaccadeRoutine } from "./Routines/DiagonalUpSaccadeRoutine.js";
+import { RandomDirectionRoutine } from "./Routines/RandomDirectionRoutine.js";
+let RoutineChanged = new CustomEvent('DotRoutineManager:RoutineChanged');
+const RoutineManager = {
+    activeDotRoutines: [
+        CounterClockwiseRotationRoutine,
+        ClockwiseRotationRoutine,
+        DirectionChangingRotationsRoutine,
+        ElasticCollisionRoutine,
+        LeftRightRoutine,
+        HorizontalSaccadeRoutine,
+        RandomDirectionRoutine,
+        UpDownRoutine,
+        VerticalSaccadeRoutine,
+        DiagonalUpwardRoutine,
+        DiagonalDownwardRoutine,
+        DiagonalDownSaccadeRoutine,
+        DiagonalUpSaccadeRoutine,
+        WaveRoutine,
+        InverseWaveRoutine,
+        PeekabooRoutine
+    ],
+    currentRoutineIndex: 0,
+};
+window.addEventListener('Game:LeftArrowClick', () => {
+    let newIndex = RoutineManager.currentRoutineIndex - 1;
+    newIndex = newIndex < 0 ? RoutineManager.activeDotRoutines.length - 1 : newIndex;
+    RoutineManager.currentRoutineIndex = newIndex;
+    window.dispatchEvent(RoutineChanged);
+});
+window.addEventListener('Game:RightArrowClick', () => {
+    RoutineManager.currentRoutineIndex =
+        (RoutineManager.currentRoutineIndex + 1) % RoutineManager.activeDotRoutines.length;
+    window.dispatchEvent(RoutineChanged);
+});
+export default RoutineManager;
