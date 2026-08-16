@@ -4,58 +4,284 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" type="image/svg+xml" href="Assets/dot.svg">
+
   <title>EyeTrainer</title>
+
+  <style>
+    .value-label {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      white-space: nowrap;
+    }
+
+    .value-input {
+      width: 42px;
+      height: 22px;
+      box-sizing: border-box;
+
+      padding: 1px 3px;
+
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      border-radius: 3px;
+
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+
+      font: inherit;
+      font-size: 12px;
+      text-align: center;
+
+      outline: none;
+    }
+
+    .value-input:focus {
+      border-color: white;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Remove the large browser number arrows */
+    .value-input::-webkit-inner-spin-button,
+    .value-input::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .value-input {
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+  </style>
 </head>
+
 <body>
-  <div class="game"><div class="dot" id="dot"></div></div>
 
-  <div class="ui">
-    <div class="controls-panel">
-      <div class="control-row">
-        <div id="velocitytext">Speed: <span id="velocityvalue">3</span></div>
-        <button type="button" class="slider-step-button" id="velocityminus" aria-label="Decrease speed">−</button>
-        <input id="velocityslider" type="range" min="0.25" max="25" value="3" step="0.001">
-        <button type="button" class="slider-step-button" id="velocityplus" aria-label="Increase speed">+</button>
-      </div>
-
-      <div class="control-row">
-        <div id="sizetext">Size: <span id="sizevalue">2</span></div>
-        <button type="button" class="slider-step-button" id="sizeminus" aria-label="Decrease target size">−</button>
-        <input id="sizeslider" type="range" min="0.01" max="10" value="2" step="0.001">
-        <button type="button" class="slider-step-button" id="sizeplus" aria-label="Increase target size">+</button>
-      </div>
-
-      <div class="control-row">
-        <div id="rangetext">Range: <span id="rangevalue">25</span></div>
-        <button type="button" class="slider-step-button" id="rangeminus" aria-label="Decrease range">−</button>
-        <input id="rangeslider" type="range" min="1" max="49" value="25" step="1">
-        <button type="button" class="slider-step-button" id="rangeplus" aria-label="Increase range">+</button>
-      </div>
-
-      <div class="color-control-row">
-        <label for="targetcolor">Target Color</label>
-        <input id="targetcolor" type="color" value="#e2b714" aria-label="Target color">
-      </div>
-
-      <div class="color-control-row">
-        <label for="backgroundcolor">Background Color</label>
-        <input id="backgroundcolor" type="color" value="#1e1e1e" aria-label="Background color">
-      </div>
-
-      <div class="routine-controls">
-        <div class="routine-change-row">
-          <div class="changeroutine">Change Routine</div>
-          <div class="arrow left"></div>
-          <div class="arrow right"></div>
-        </div>
-        <div class="routinename">Routine Name</div>
-      </div>
-    </div>
+  <div class="game">
+    <div class="dot" id="dot"></div>
   </div>
 
-  <script src="./Engine/GameLoop.js" type="module"></script>
-  <script src="./Game.js" type="module"></script>
+  <div class="ui">
+
+    <div class="controls-panel">
+
+      <!-- SPEED -->
+      <div class="control-row">
+
+        <div id="velocitytext" class="value-label">
+          <label for="velocityvalue">Speed:</label>
+
+          <input
+            id="velocityvalue"
+            class="value-input"
+            type="number"
+            min="0.25"
+            max="25"
+            step="0.001"
+            value="3"
+            inputmode="decimal"
+            aria-label="Speed value"
+          >
+        </div>
+
+        <button
+          type="button"
+          class="slider-step-button"
+          id="velocityminus"
+          aria-label="Decrease speed"
+        >
+          −
+        </button>
+
+        <input
+          id="velocityslider"
+          type="range"
+          min="0.25"
+          max="25"
+          value="3"
+          step="0.001"
+        >
+
+        <button
+          type="button"
+          class="slider-step-button"
+          id="velocityplus"
+          aria-label="Increase speed"
+        >
+          +
+        </button>
+
+      </div>
+
+
+      <!-- SIZE -->
+      <div class="control-row">
+
+        <div id="sizetext" class="value-label">
+          <label for="sizevalue">Size:</label>
+
+          <input
+            id="sizevalue"
+            class="value-input"
+            type="number"
+            min="0.01"
+            max="10"
+            step="0.001"
+            value="2"
+            inputmode="decimal"
+            aria-label="Target size value"
+          >
+        </div>
+
+        <button
+          type="button"
+          class="slider-step-button"
+          id="sizeminus"
+          aria-label="Decrease target size"
+        >
+          −
+        </button>
+
+        <input
+          id="sizeslider"
+          type="range"
+          min="0.01"
+          max="10"
+          value="2"
+          step="0.001"
+        >
+
+        <button
+          type="button"
+          class="slider-step-button"
+          id="sizeplus"
+          aria-label="Increase target size"
+        >
+          +
+        </button>
+
+      </div>
+
+
+      <!-- RANGE -->
+      <div class="control-row">
+
+        <div id="rangetext" class="value-label">
+          <label for="rangevalue">Range:</label>
+
+          <input
+            id="rangevalue"
+            class="value-input"
+            type="number"
+            min="1"
+            max="49"
+            step="1"
+            value="25"
+            inputmode="numeric"
+            aria-label="Range value"
+          >
+        </div>
+
+        <button
+          type="button"
+          class="slider-step-button"
+          id="rangeminus"
+          aria-label="Decrease range"
+        >
+          −
+        </button>
+
+        <input
+          id="rangeslider"
+          type="range"
+          min="1"
+          max="49"
+          value="25"
+          step="1"
+        >
+
+        <button
+          type="button"
+          class="slider-step-button"
+          id="rangeplus"
+          aria-label="Increase range"
+        >
+          +
+        </button>
+
+      </div>
+
+
+      <!-- TARGET COLOR -->
+      <div class="color-control-row">
+
+        <label for="targetcolor">
+          Target Color
+        </label>
+
+        <input
+          id="targetcolor"
+          type="color"
+          value="#e2b714"
+          aria-label="Target color"
+        >
+
+      </div>
+
+
+      <!-- BACKGROUND COLOR -->
+      <div class="color-control-row">
+
+        <label for="backgroundcolor">
+          Background Color
+        </label>
+
+        <input
+          id="backgroundcolor"
+          type="color"
+          value="#1e1e1e"
+          aria-label="Background color"
+        >
+
+      </div>
+
+
+      <!-- ROUTINE CONTROLS -->
+      <div class="routine-controls">
+
+        <div class="routine-change-row">
+
+          <div class="changeroutine">
+            Change Routine
+          </div>
+
+          <div class="arrow left"></div>
+
+          <div class="arrow right"></div>
+
+        </div>
+
+        <div class="routinename">
+          Routine Name
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script
+    src="./Engine/GameLoop.js"
+    type="module">
+  </script>
+
+  <script
+    src="./Game.js"
+    type="module">
+  </script>
+
 </body>
 </html>
