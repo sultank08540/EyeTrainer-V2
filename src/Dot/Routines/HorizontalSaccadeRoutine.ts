@@ -3,6 +3,11 @@ import { IDotRoutine } from "../IDotRoutine.js";
 
 let timeSinceLastJump:number = 0;
 let isOnRightSide:boolean = false;
+let horizontalHeight:number = 50;
+
+window.addEventListener('Game:VerticalPositionChanged', (event: Event) => {
+  horizontalHeight = parseFloat((event as CustomEvent).detail.height);
+});
 
 export const HorizontalSaccadeRoutine : IDotRoutine = {
   Execute: function(dot: Dot) {
@@ -13,7 +18,7 @@ export const HorizontalSaccadeRoutine : IDotRoutine = {
       timeSinceLastJump = 0;
     }
     dot.X = isOnRightSide ? dot.halfScreen + dot.range : dot.halfScreen - dot.range;
-    dot.Y = dot.halfScreen;
+    dot.Y = 100 - horizontalHeight;
   },
   title: 'Horizontal Saccades',
   duration: 30,
