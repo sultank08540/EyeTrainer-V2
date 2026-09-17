@@ -1,5 +1,9 @@
 let timeSinceLastJump = 0;
 let isOnRightSide = false;
+let horizontalHeight = 50;
+window.addEventListener('Game:VerticalPositionChanged', (event) => {
+    horizontalHeight = parseFloat(event.detail.height);
+});
 export const HorizontalSaccadeRoutine = {
     Execute: function (dot) {
         timeSinceLastJump += dot.dTime;
@@ -9,7 +13,7 @@ export const HorizontalSaccadeRoutine = {
             timeSinceLastJump = 0;
         }
         dot.X = isOnRightSide ? dot.halfScreen + dot.range : dot.halfScreen - dot.range;
-        dot.Y = dot.halfScreen;
+        dot.Y = 100 - horizontalHeight;
     },
     title: 'Horizontal Saccades',
     duration: 30,
