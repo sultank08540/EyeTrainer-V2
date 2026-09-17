@@ -22,19 +22,14 @@
       width: 42px;
       height: 22px;
       box-sizing: border-box;
-
       padding: 1px 3px;
-
       border: 1px solid rgba(255, 255, 255, 0.65);
       border-radius: 3px;
-
       background: rgba(255, 255, 255, 0.08);
       color: white;
-
       font: inherit;
       font-size: 12px;
       text-align: center;
-
       outline: none;
     }
 
@@ -43,7 +38,6 @@
       background: rgba(255, 255, 255, 0.15);
     }
 
-    /* Remove the large browser number arrows */
     .value-input::-webkit-inner-spin-button,
     .value-input::-webkit-outer-spin-button {
       -webkit-appearance: none;
@@ -54,234 +48,100 @@
       appearance: textfield;
       -moz-appearance: textfield;
     }
+
+    #heighttext {
+      font-weight: bold;
+      font-size: 14px;
+      color: white;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    #heightslider {
+      width: 135px;
+      margin: 0;
+    }
   </style>
 </head>
 
 <body>
-
   <div class="game">
     <div class="dot" id="dot"></div>
   </div>
 
-  <div class="ui">
-
+  <div class="ui" style="height: 350px;">
     <div class="controls-panel">
 
       <!-- SPEED -->
       <div class="control-row">
-
         <div id="velocitytext" class="value-label">
           <label for="velocityvalue">Speed:</label>
-
-          <input
-            id="velocityvalue"
-            class="value-input"
-            type="number"
-            min="0.25"
-            max="25"
-            step="0.001"
-            value="3"
-            inputmode="decimal"
-            aria-label="Speed value"
-          >
+          <input id="velocityvalue" class="value-input" type="number" min="0.25" max="25" step="0.001" value="3" inputmode="decimal" aria-label="Speed value">
         </div>
-
-        <button
-          type="button"
-          class="slider-step-button"
-          id="velocityminus"
-          aria-label="Decrease speed"
-        >
-          −
-        </button>
-
-        <input
-          id="velocityslider"
-          type="range"
-          min="0.25"
-          max="25"
-          value="3"
-          step="0.001"
-        >
-
-        <button
-          type="button"
-          class="slider-step-button"
-          id="velocityplus"
-          aria-label="Increase speed"
-        >
-          +
-        </button>
-
+        <button type="button" class="slider-step-button" id="velocityminus" aria-label="Decrease speed">−</button>
+        <input id="velocityslider" type="range" min="0.25" max="25" value="3" step="0.001">
+        <button type="button" class="slider-step-button" id="velocityplus" aria-label="Increase speed">+</button>
       </div>
-
 
       <!-- SIZE -->
       <div class="control-row">
-
         <div id="sizetext" class="value-label">
           <label for="sizevalue">Size:</label>
-
-          <input
-            id="sizevalue"
-            class="value-input"
-            type="number"
-            min="0.01"
-            max="10"
-            step="0.001"
-            value="2"
-            inputmode="decimal"
-            aria-label="Target size value"
-          >
+          <input id="sizevalue" class="value-input" type="number" min="0.01" max="10" step="0.001" value="2" inputmode="decimal" aria-label="Target size value">
         </div>
-
-        <button
-          type="button"
-          class="slider-step-button"
-          id="sizeminus"
-          aria-label="Decrease target size"
-        >
-          −
-        </button>
-
-        <input
-          id="sizeslider"
-          type="range"
-          min="0.01"
-          max="10"
-          value="2"
-          step="0.001"
-        >
-
-        <button
-          type="button"
-          class="slider-step-button"
-          id="sizeplus"
-          aria-label="Increase target size"
-        >
-          +
-        </button>
-
+        <button type="button" class="slider-step-button" id="sizeminus" aria-label="Decrease target size">−</button>
+        <input id="sizeslider" type="range" min="0.01" max="10" value="2" step="0.001">
+        <button type="button" class="slider-step-button" id="sizeplus" aria-label="Increase target size">+</button>
       </div>
-
 
       <!-- RANGE -->
       <div class="control-row">
-
         <div id="rangetext" class="value-label">
           <label for="rangevalue">Range:</label>
-
-          <input
-            id="rangevalue"
-            class="value-input"
-            type="number"
-            min="1"
-            max="49"
-            step="1"
-            value="25"
-            inputmode="numeric"
-            aria-label="Range value"
-          >
+          <input id="rangevalue" class="value-input" type="number" min="1" max="49" step="1" value="25" inputmode="numeric" aria-label="Range value">
         </div>
-
-        <button
-          type="button"
-          class="slider-step-button"
-          id="rangeminus"
-          aria-label="Decrease range"
-        >
-          −
-        </button>
-
-        <input
-          id="rangeslider"
-          type="range"
-          min="1"
-          max="49"
-          value="25"
-          step="1"
-        >
-
-        <button
-          type="button"
-          class="slider-step-button"
-          id="rangeplus"
-          aria-label="Increase range"
-        >
-          +
-        </button>
-
+        <button type="button" class="slider-step-button" id="rangeminus" aria-label="Decrease range">−</button>
+        <input id="rangeslider" type="range" min="1" max="49" value="25" step="1">
+        <button type="button" class="slider-step-button" id="rangeplus" aria-label="Increase range">+</button>
       </div>
 
+      <!-- HEIGHT: shown only for Left Right Left and Horizontal Saccades -->
+      <div class="control-row" id="heightrow" style="display: none;">
+        <div id="heighttext" class="value-label">
+          <label for="heightvalue">Height:</label>
+          <input id="heightvalue" class="value-input" type="number" min="5" max="95" step="1" value="50" inputmode="numeric" aria-label="Target height value">
+        </div>
+        <button type="button" class="slider-step-button" id="heightminus" aria-label="Move target lower">−</button>
+        <input id="heightslider" type="range" min="5" max="95" value="50" step="1">
+        <button type="button" class="slider-step-button" id="heightplus" aria-label="Move target higher">+</button>
+      </div>
 
       <!-- TARGET COLOR -->
       <div class="color-control-row">
-
-        <label for="targetcolor">
-          Target Color
-        </label>
-
-        <input
-          id="targetcolor"
-          type="color"
-          value="#e2b714"
-          aria-label="Target color"
-        >
-
+        <label for="targetcolor">Target Color</label>
+        <input id="targetcolor" type="color" value="#e2b714" aria-label="Target color">
       </div>
-
 
       <!-- BACKGROUND COLOR -->
       <div class="color-control-row">
-
-        <label for="backgroundcolor">
-          Background Color
-        </label>
-
-        <input
-          id="backgroundcolor"
-          type="color"
-          value="#1e1e1e"
-          aria-label="Background color"
-        >
-
+        <label for="backgroundcolor">Background Color</label>
+        <input id="backgroundcolor" type="color" value="#1e1e1e" aria-label="Background color">
       </div>
-
 
       <!-- ROUTINE CONTROLS -->
       <div class="routine-controls">
-
         <div class="routine-change-row">
-
-          <div class="changeroutine">
-            Change Routine
-          </div>
-
+          <div class="changeroutine">Change Routine</div>
           <div class="arrow left"></div>
-
           <div class="arrow right"></div>
-
         </div>
-
-        <div class="routinename">
-          Routine Name
-        </div>
-
+        <div class="routinename">Routine Name</div>
       </div>
 
     </div>
-
   </div>
 
-  <script
-    src="./Engine/GameLoop.js"
-    type="module">
-  </script>
-
-  <script
-    src="./Game.js"
-    type="module">
-  </script>
-
+  <script src="./Engine/GameLoop.js" type="module"></script>
+  <script src="./Game.js" type="module"></script>
 </body>
 </html>
