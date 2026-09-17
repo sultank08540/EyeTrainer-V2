@@ -1,170 +1,135 @@
 import { Dot } from "./Dot/Dot.js";
+import RoutineManager from "./Dot/DotRoutineManager.js";
 import { SubscribeToRoutineChangedEvent } from "./RoutineTitleFollower.js";
 import { SubscribeToNotificationsButtonClick } from "./PushNotifications.js";
+const DEFAULT_SETTINGS = {
+    "speed": "3",
+    "size": "2",
+    "range": "25",
+    "height": "50",
+    "target-color": "#e2b714",
+    "background-color": "#1e1e1e"
+};
+const LEGACY_STORAGE_KEYS = {
+    "speed": "blinkcamp-speed",
+    "size": "blinkcamp-size",
+    "range": "blinkcamp-range",
+    "target-color": "blinkcamp-target-color",
+    "background-color": "blinkcamp-background-color"
+};
+const HEIGHT_ENABLED_ROUTINES = new Set([
+    "Left Right Left",
+    "Horizontal Saccades"
+]);
+const GetActiveRoutineTitle = () => RoutineManager.activeDotRoutines[RoutineManager.currentRoutineIndex].title;
+const GetRoutineStorageKey = (setting) => `blinkcamp-routine-${encodeURIComponent(GetActiveRoutineTitle())}-${setting}`;
+const SaveRoutineSetting = (setting, value) => {
+    localStorage.setItem(GetRoutineStorageKey(setting), value);
+};
+const GetSavedRoutineSetting = (setting) => {
+    const routineValue = localStorage.getItem(GetRoutineStorageKey(setting));
+    if (routineValue !== null) {
+        return routineValue;
+    }
+    const legacyKey = LEGACY_STORAGE_KEYS[setting];
+    if (legacyKey !== undefined) {
+        const legacyValue = localStorage.getItem(legacyKey);
+        if (legacyValue !== null) {
+            return legacyValue;
+        }
+    }
+    return DEFAULT_SETTINGS[setting];
+};
 const InitializeScene = () => {
     new Dot(document.getElementById("dot"));
     SetLeftArrowEvent();
     SetRightArrowEvent();
-    SetVelocityChangeEvent();
-    SetRadiusChangeEvent();
-    SetRangeChangeEvent();
+    SetupSliderControl("velocityslider", "velocityvalue", "speed", "Game:VelocityValueChanged", "velocity");
+    SetupSliderControl("sizeslider", "sizevalue", "size", "Game:RadiusValueChanged", "radius");
+    SetupSliderControl("rangeslider", "rangevalue", "range", "Game:RangeValueChanged", "range");
+    SetupSliderControl("heightslider", "heightvalue", "height", "Game:VerticalPositionChanged", "height");
     SetNumberInputEvents();
     SetSliderStepButtons();
-    SetTargetColorEvent();
-    SetBackgroundColorEvent();
+    SetColorEvent("targetcolor", "target-color", "--dot-color");
+    SetColorEvent("backgroundcolor", "background-color", "--background-color");
     SetControlsPanelToggleEvent();
     SubscribeToRoutineChangedEvent();
     SubscribeToNotificationsButtonClick();
+    window.addEventListener("DotRoutineManager:RoutineChanged", LoadSavedSettings);
     LoadSavedSettings();
 };
-/*
-    ROUTINE ARROWS
-*/
+/* ROUTINE ARROWS */
 const SetLeftArrowEvent = () => {
-    const leftArrowClickEvent = new CustomEvent('Game:LeftArrowClick');
+    const leftArrowClickEvent = new CustomEvent("Game:LeftArrowClick");
     const leftArrow = document.querySelector(".arrow.left");
     leftArrow.addEventListener("click", () => window.dispatchEvent(leftArrowClickEvent));
 };
 const SetRightArrowEvent = () => {
-    const rightArrowClickEvent = new CustomEvent('Game:RightArrowClick');
+    const rightArrowClickEvent = new CustomEvent("Game:RightArrowClick");
     const rightArrow = document.querySelector(".arrow.right");
     rightArrow.addEventListener("click", () => window.dispatchEvent(rightArrowClickEvent));
 };
-/*
-    SPEED
-*/
-const SetVelocityChangeEvent = () => {
-    const slider = document.getElementById("velocityslider");
-    const valueInput = document.getElementById("velocityvalue");
+/* SLIDERS */
+const SetupSliderControl = (sliderId, valueInputId, setting, eventName, detailName) => {
+    const slider = document.getElementById(sliderId);
+    const valueInput = document.getElementById(valueInputId);
     slider.addEventListener("input", () => {
-        valueInput.value =
-            formatSliderValue(slider.value);
-        window.dispatchEvent(new CustomEvent('Game:VelocityValueChanged', {
+        valueInput.value = formatSliderValue(slider.value);
+        window.dispatchEvent(new CustomEvent(eventName, {
             detail: {
-                velocity: slider.value
+                [detailName]: slider.value
             }
         }));
-        localStorage.setItem("blinkcamp-speed", slider.value);
+        SaveRoutineSetting(setting, slider.value);
     });
 };
-/*
-    SIZE
-*/
-const SetRadiusChangeEvent = () => {
-    const slider = document.getElementById("sizeslider");
-    const valueInput = document.getElementById("sizevalue");
-    slider.addEventListener("input", () => {
-        valueInput.value =
-            formatSliderValue(slider.value);
-        window.dispatchEvent(new CustomEvent('Game:RadiusValueChanged', {
-            detail: {
-                radius: slider.value
-            }
-        }));
-        localStorage.setItem("blinkcamp-size", slider.value);
-    });
-};
-/*
-    RANGE
-*/
-const SetRangeChangeEvent = () => {
-    const slider = document.getElementById("rangeslider");
-    const valueInput = document.getElementById("rangevalue");
-    slider.addEventListener("input", () => {
-        valueInput.value =
-            formatSliderValue(slider.value);
-        window.dispatchEvent(new CustomEvent('Game:RangeValueChanged', {
-            detail: {
-                range: slider.value
-            }
-        }));
-        localStorage.setItem("blinkcamp-range", slider.value);
-    });
-};
-/*
-    EDITABLE NUMBER BOXES
-*/
+/* EDITABLE NUMBER BOXES */
 const SetNumberInputEvents = () => {
     SetupNumberInput("velocityvalue", "velocityslider");
     SetupNumberInput("sizevalue", "sizeslider");
     SetupNumberInput("rangevalue", "rangeslider");
+    SetupNumberInput("heightvalue", "heightslider");
 };
 const SetupNumberInput = (inputId, sliderId) => {
     const input = document.getElementById(inputId);
     const slider = document.getElementById(sliderId);
-    /*
-        Press Enter to apply the typed value.
-    */
     input.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
             CommitNumberInput(input, slider);
             input.blur();
         }
     });
-    /*
-        Clicking somewhere else after typing
-        also applies the value.
-    */
     input.addEventListener("change", () => {
         CommitNumberInput(input, slider);
     });
-    /*
-        Select the current number when
-        clicking into the box.
-    */
     input.addEventListener("focus", () => {
         input.select();
     });
 };
 const CommitNumberInput = (input, slider) => {
     let newValue = parseFloat(input.value);
-    /*
-        If the typed value is invalid,
-        restore the current slider value.
-    */
     if (Number.isNaN(newValue)) {
-        input.value =
-            formatSliderValue(slider.value);
+        input.value = formatSliderValue(slider.value);
         return;
     }
     const minimum = parseFloat(slider.min);
     const maximum = parseFloat(slider.max);
-    /*
-        Keep values inside the allowed range.
-    */
-    newValue =
-        Math.max(minimum, Math.min(maximum, newValue));
-    /*
-        Respect the slider step.
-    */
+    newValue = Math.max(minimum, Math.min(maximum, newValue));
     const step = parseFloat(slider.step);
-    if (!Number.isNaN(step) &&
-        step > 0) {
-        const stepCount = Math.round((newValue - minimum) /
-            step);
-        newValue =
-            minimum +
-                (stepCount * step);
+    if (!Number.isNaN(step) && step > 0) {
+        const stepCount = Math.round((newValue - minimum) / step);
+        newValue = minimum + (stepCount * step);
     }
-    /*
-        Prevent floating-point artifacts.
-    */
-    newValue =
-        Math.round(newValue * 1000) / 1000;
-    slider.value =
-        newValue.toString();
-    /*
-        Trigger normal slider behavior.
-    */
+    newValue = Math.round(newValue * 1000) / 1000;
+    slider.value = newValue.toString();
     slider.dispatchEvent(new Event("input"));
 };
-/*
-    PLUS / MINUS BUTTONS
-*/
+/* PLUS / MINUS BUTTONS */
 const SetSliderStepButtons = () => {
-    SetupSliderStepButtons("velocityslider", "velocityminus", "velocityplus", 0.25);
-    SetupSliderStepButtons("sizeslider", "sizeminus", "sizeplus", 0.25);
+    SetupSliderStepButtons("velocityslider", "velocityminus", "velocityplus", 0.05);
+    SetupSliderStepButtons("sizeslider", "sizeminus", "sizeplus", 0.05);
     SetupSliderStepButtons("rangeslider", "rangeminus", "rangeplus", 1);
+    SetupSliderStepButtons("heightslider", "heightminus", "heightplus", 1);
 };
 const SetupSliderStepButtons = (sliderId, minusId, plusId, increment) => {
     const slider = document.getElementById(sliderId);
@@ -180,82 +145,47 @@ const SetupSliderStepButtons = (sliderId, minusId, plusId, increment) => {
 const ChangeSliderValue = (slider, amount) => {
     const minimum = parseFloat(slider.min);
     const maximum = parseFloat(slider.max);
-    let next = parseFloat(slider.value) +
-        amount;
-    next =
-        Math.max(minimum, Math.min(maximum, next));
-    next =
-        Math.round(next * 1000) / 1000;
-    slider.value =
-        next.toString();
+    let next = parseFloat(slider.value) + amount;
+    next = Math.max(minimum, Math.min(maximum, next));
+    next = Math.round(next * 1000) / 1000;
+    slider.value = next.toString();
     slider.dispatchEvent(new Event("input"));
 };
-/*
-    TARGET COLOR
-*/
-const SetTargetColorEvent = () => {
-    const picker = document.getElementById("targetcolor");
+/* COLORS */
+const SetColorEvent = (pickerId, setting, cssVariable) => {
+    const picker = document.getElementById(pickerId);
     picker.addEventListener("input", () => {
-        document.documentElement.style.setProperty("--dot-color", picker.value);
-        localStorage.setItem("blinkcamp-target-color", picker.value);
+        document.documentElement.style.setProperty(cssVariable, picker.value);
+        SaveRoutineSetting(setting, picker.value);
     });
 };
-/*
-    BACKGROUND COLOR
-*/
-const SetBackgroundColorEvent = () => {
-    const picker = document.getElementById("backgroundcolor");
-    picker.addEventListener("input", () => {
-        document.documentElement.style.setProperty("--background-color", picker.value);
-        localStorage.setItem("blinkcamp-background-color", picker.value);
-    });
+/* HEIGHT CONTROL VISIBILITY */
+const UpdateHeightControlVisibility = () => {
+    const heightRow = document.getElementById("heightrow");
+    heightRow.style.display = HEIGHT_ENABLED_ROUTINES.has(GetActiveRoutineTitle())
+        ? "grid"
+        : "none";
 };
-/*
-    CONTROL PANEL HIDE / REVEAL
-*/
+/* CONTROL PANEL HIDE / REVEAL */
 const SetControlsPanelToggleEvent = () => {
     const controlArea = document.querySelector(".ui");
     let hiddenByClick = false;
-    /*
-        CLICKING THE CONTROL AREA
-
-        Clicking sliders, number boxes,
-        +/- buttons, color pickers or arrows
-        continues to operate those controls normally.
-
-        Clicking an empty/text portion of the
-        controller toggles complete invisibility.
-    */
     controlArea.addEventListener("click", (event) => {
         const target = event.target;
         const isControl = target.closest("input, button, .arrow, label");
         if (isControl) {
             return;
         }
-        /*
-            If it is currently hidden,
-            clicking the invisible area
-            brings it back immediately.
-        */
         if (hiddenByClick) {
             hiddenByClick = false;
             controlArea.classList.remove("controls-click-hidden");
             controlArea.classList.remove("controls-hidden");
             return;
         }
-        /*
-            Otherwise hide it completely.
-        */
         hiddenByClick = true;
         controlArea.classList.remove("controls-hidden");
         controlArea.classList.add("controls-click-hidden");
     });
-    /*
-        After hiding it, moving the mouse OUT
-        keeps the controls completely invisible
-        but prepares the invisible area so that
-        hovering back into it reveals the controls.
-    */
     controlArea.addEventListener("mouseleave", () => {
         if (!hiddenByClick) {
             return;
@@ -263,63 +193,39 @@ const SetControlsPanelToggleEvent = () => {
         controlArea.classList.remove("controls-click-hidden");
         controlArea.classList.add("controls-hidden");
     });
-    /*
-        If the panel was hidden and the pointer
-        comes back into the bottom-left activation
-        area, restore the controls.
-    */
     controlArea.addEventListener("mouseenter", () => {
-        if (hiddenByClick &&
-            controlArea.classList.contains("controls-hidden")) {
+        if (hiddenByClick && controlArea.classList.contains("controls-hidden")) {
             hiddenByClick = false;
             controlArea.classList.remove("controls-hidden");
             controlArea.classList.remove("controls-click-hidden");
         }
     });
 };
-/*
-    LOAD SAVED SETTINGS
-*/
+/* LOAD SETTINGS FOR THE ACTIVE ROUTINE */
 const LoadSavedSettings = () => {
     const velocity = document.getElementById("velocityslider");
     const radius = document.getElementById("sizeslider");
     const range = document.getElementById("rangeslider");
+    const height = document.getElementById("heightslider");
     const target = document.getElementById("targetcolor");
     const background = document.getElementById("backgroundcolor");
-    const savedSpeed = localStorage.getItem("blinkcamp-speed");
-    const savedSize = localStorage.getItem("blinkcamp-size");
-    const savedRange = localStorage.getItem("blinkcamp-range");
-    const savedTargetColor = localStorage.getItem("blinkcamp-target-color");
-    const savedBackgroundColor = localStorage.getItem("blinkcamp-background-color");
-    if (savedSpeed !== null) {
-        velocity.value =
-            savedSpeed;
-    }
-    if (savedSize !== null) {
-        radius.value =
-            savedSize;
-    }
-    if (savedRange !== null) {
-        range.value =
-            savedRange;
-    }
-    if (savedTargetColor !== null) {
-        target.value =
-            savedTargetColor;
-        document.documentElement.style.setProperty("--dot-color", savedTargetColor);
-    }
-    if (savedBackgroundColor !== null) {
-        background.value =
-            savedBackgroundColor;
-        document.documentElement.style.setProperty("--background-color", savedBackgroundColor);
-    }
+    velocity.value = GetSavedRoutineSetting("speed");
+    radius.value = GetSavedRoutineSetting("size");
+    range.value = GetSavedRoutineSetting("range");
+    height.value = GetSavedRoutineSetting("height");
+    target.value = GetSavedRoutineSetting("target-color");
+    background.value = GetSavedRoutineSetting("background-color");
+    document.documentElement.style.setProperty("--dot-color", target.value);
+    document.documentElement.style.setProperty("--background-color", background.value);
     velocity.dispatchEvent(new Event("input"));
     radius.dispatchEvent(new Event("input"));
     range.dispatchEvent(new Event("input"));
+    height.dispatchEvent(new Event("input"));
+    SaveRoutineSetting("target-color", target.value);
+    SaveRoutineSetting("background-color", background.value);
+    UpdateHeightControlVisibility();
 };
-/*
-    DISPLAY FORMATTING
-*/
+/* DISPLAY FORMATTING */
 const formatSliderValue = (value) => {
     const numberValue = parseFloat(value);
     if (Number.isInteger(numberValue)) {
